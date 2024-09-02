@@ -1,0 +1,51 @@
+kind: Deployment
+metadata:
+  name: ping-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ping
+  template:
+    metadata:
+      labels:
+        app: ping
+    spec:
+      containers:
+        - name: ping
+          image: nikhilsaxena/ping:v1
+          ports:
+            - containerPort: 5000
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "250m"
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: 5000
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /ping
+              port: 5000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+
+---
+#...Ping Service YAML file
+apiVersion: v1
+kind: Service
+metadata:
+  name: ping-service
+spec:
+  selector:
+    app: ping
+  ports:
+    - port: 5000
+      targetPort: 5000
+  type: LoadBalancer
